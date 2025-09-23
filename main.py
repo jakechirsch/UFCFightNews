@@ -91,11 +91,11 @@ def get_title(link):
         return unquote(link.split("/wiki/")[-1].split("#")[0])
     return None
 
-def print_bout(weight, fighter1, fighter2):
+def print_bout(weight, fighter1, fighter2, max_first):
     print(weight.ljust(23, " "), end='')
-    print(fighter1.rjust(23, " "), end=' ')
+    print(fighter1.rjust(max_first, " "), end=' ')
     print("vs.", end=' ')
-    print(fighter2.ljust(23, " "))
+    print(fighter2)
 
 print_menu()
 command = input()
@@ -115,6 +115,22 @@ while test_input(command) != "":
     html = data["parse"]["text"]["*"]
     soup = BeautifulSoup(html, "html.parser")
     tables = soup.find_all("table", {"class": "toccolours"})
+    heading = soup.find("h2", id="Announced_bouts")
+
+    _max_first = 0
+    if tables:
+        scheduled_table = tables[0]
+        for row in scheduled_table.find_all("tr"):
+            cols = row.find_all(["td", "th"])
+            if len(cols) >= 4:
+                _fighter1 = cols[1].get_text(" ", strip=True)
+                _max_first = max(_max_first, len(_fighter1))
+    if heading is not None:
+        ul = heading.find_next("ul")
+        for li in ul.find_all("li"):
+            bout_text = li.get_text(separator=" ", strip=True)
+            _fighter1 = bout_text.split("bout:")[1].split("vs.")[0].strip()
+            _max_first = max(_max_first, len(_fighter1))
 
     if tables:
         scheduled_table = tables[0]
@@ -126,15 +142,13 @@ while test_input(command) != "":
             if len(cols) >= 4:
                 _weight = cols[0].get_text(" ", strip=True)
                 _fighter1 = cols[1].get_text(" ", strip=True)
-                _ = cols[2].get_text(" ", strip=True)
                 _fighter2 = cols[3].get_text(" ", strip=True)
-                print_bout(_weight, _fighter1, _fighter2)
+                print_bout(_weight, _fighter1, _fighter2, _max_first)
             else:
                 print()
                 print(cols[0].get_text(" ", strip=True))
                 print()
 
-    heading = soup.find("h2", id="Announced_bouts")
     if heading is not None:
         print()
         print("Announced bouts")
@@ -145,7 +159,7 @@ while test_input(command) != "":
             _weight = bout_text.split("bout:")[0].strip()
             _fighter1 = bout_text.split("bout:")[1].split("vs.")[0].strip()
             _fighter2 = bout_text.split("bout:")[1].split("vs.")[1].split("[")[0].strip()
-            print_bout(_weight, _fighter1, _fighter2)
+            print_bout(_weight, _fighter1, _fighter2, _max_first)
 
     time.sleep(1)
     print()
@@ -154,6 +168,3 @@ while test_input(command) != "":
 
     print_menu()
     command = input()
-
-# Add:
-# Better fighter1 name length checking

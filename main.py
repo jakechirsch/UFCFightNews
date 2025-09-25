@@ -17,40 +17,63 @@ max_date = 0
 max_venue = 0
 max_location = 0
 
-# This loop retrieves the list of upcoming events
-# and the maximum lengths of event names, dates, venues, and locations
-for row in scheduled_table.find_all("tr")[1:]: # skip header row
-    # Gets elements of table
+# Carryover for rowspans
+carry = {}  # {col_index: {"text": str, "rows": int}}
+
+for row in scheduled_table.find_all("tr")[1:]:  # skip header row
     cols = row.find_all(["td", "th"])
-    if len(cols) >= 4:
-        # Gets href representing link to page for specific event
-        td = cols[0]
-        a_tag = td.find("a")
-        href = None
-        if a_tag and a_tag.has_attr("href"):
-            href = a_tag["href"]
+    values = []
+    col_index = 0
+    i = 0
 
-        # Gets relevant information for event:
-        # event name, date, venue, and location
-        event_name = cols[0].get_text(" ", strip=True)
-        date = cols[1].get_text(" ", strip=True)
-        venue = cols[2].get_text(" ", strip=True)
-        location = cols[3].get_text(" ", strip=True)
+    while col_index < 4:
+        # Case where a previous row has an active rowspan
+        if col_index in carry:
+            values.append(carry[col_index]["text"])
+            carry[col_index]["rows"] -= 1
+            if carry[col_index]["rows"] == 0:
+                del carry[col_index]
+            col_index += 1
+        else:
+            if i < len(cols):
+                cell = cols[i]
+                text = cell.get_text(" ", strip=True)
+                values.append(text)
 
-        # Creates dictionary for event
-        events.append({
-            "event": event_name,
-            "date": date,
-            "venue": venue,
-            "location": location,
-            "href": href
-        })
+                # Store rowspan if present
+                rowspan = cell.get("rowspan")
+                if rowspan and rowspan.isdigit() and int(rowspan) > 1:
+                    carry[col_index] = {"text": text, "rows": int(rowspan) - 1}
 
-        # Updates maximum length trackers
-        max_event = max(max_event, len(event_name))
-        max_date = max(max_date, len(date))
-        max_venue = max(max_venue, len(venue))
-        max_location = max(max_location, len(location))
+                i += 1
+                col_index += 1
+            else:
+                # No more columns left, but we still need values
+                values.append("")
+                col_index += 1
+
+    # Unpack values
+    event_name, date, venue, location = values
+
+    # Get href for event
+    td = row.find_all(["td", "th"])[0]
+    a_tag = td.find("a")
+    href = a_tag["href"] if a_tag and a_tag.has_attr("href") else None
+
+    # Creates dictionary for event
+    events.append({
+        "event": event_name,
+        "date": date,
+        "venue": venue,
+        "location": location,
+        "href": href
+    })
+
+    # Update maximum lengths
+    max_event = max(max_event, len(event_name))
+    max_date = max(max_date, len(date))
+    max_venue = max(max_venue, len(venue))
+    max_location = max(max_location, len(location))
 
 # Reverses events to get them in chronological order
 events.reverse()

@@ -20,6 +20,8 @@ max_location = 0
 # Carryover for rowspans
 carry = {}  # {col_index: {"text": str, "rows": int}}
 
+# This loop retrieves the list of upcoming events
+# and the maximum lengths of event names, dates, venues, and locations
 for row in scheduled_table.find_all("tr")[1:]:  # skip header row
     cols = row.find_all(["td", "th"])
     values = []

@@ -38,6 +38,11 @@ def get_rankings():
             if len(cols) >= 6:
                 rank = cols[0].get_text(" ", strip=True)
                 fighter = cols[2].get_text(" ", strip=True)
+
+                # Removes Wikipedia's tied ranking tag
+                if rank[-4:] == " (T)":
+                    rank = rank[:-4]
+
                 if rank == "C":
                     rank_string = "(C) "
                 else:

@@ -2,7 +2,6 @@
 from cli_utility import print_instruction, print_menu, test_input
 from scrape_utility import get_params, get_html, get_title
 from data_utility import print_event
-#import shelve
 
 # Retrieves parameters for the page listing upcoming events
 list_of_events = get_params("List of UFC events")
@@ -105,15 +104,21 @@ while test_input(command) != "":
         continue
 
     if input_num == 0:
+        printed_any = False
         for event in events:
             if event["event"] != "View Newly Announced Fights":
-                pass
-        continue
+                # Retrieves event title from the href
+                title = get_title(event["href"])
 
-    # Retrieves event title from the href
-    title = get_title(events[input_num]["href"])
+                printed_event = print_event(title, only_new = True)
+                printed_any = printed_any or printed_event
+        if not printed_any:
+            print("All caught up!")
+    else:
+        # Retrieves event title from the href
+        title = get_title(events[input_num]["href"])
 
-    print_event(title)
+        print_event(title)
 
     # Instructs user to return to menu and waits for input
     print()

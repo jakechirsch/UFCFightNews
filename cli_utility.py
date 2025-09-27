@@ -18,12 +18,9 @@ def print_menu(events, max_event, max_date, max_venue, max_location):
         print(e["venue"].ljust(max_venue + 3, " "), end='')
         print(e["location"].ljust(max_location + 3, " "), flush=True)
 
-# This function pretty-prints one bout
-def print_bout(weight, fighter1, fighter2, max_first):
-    print(weight.ljust(23, " "), end='')
-    print(fighter1.rjust(max_first, " "), end=' ')
-    print("vs.", end=' ')
-    print(fighter2, flush=True)
+# This function returns one bout in a formatted string
+def return_bout(weight, fighter1, fighter2, max_first):
+    return weight.ljust(23, " ") + fighter1.rjust(max_first, " ") + " vs. " + fighter2
 
 # This function tests whether the input is an integer
 def test_input(x):

@@ -16,9 +16,8 @@ def print_event(title, only_new = False):
 
     title = title.replace('_', ' ')
 
-    # Trackers for only_new printing
+    # Tracker for only_new printing
     printed_title = False
-    printed_additions = False
 
     # Retrieves the event page HTML
     soup = get_html(event_title)
@@ -71,12 +70,9 @@ def print_event(title, only_new = False):
                             print()
                             print(title)
                             print()
-                            printed_title = True
-
-                        if not printed_additions:
                             print("Additions:")
                             print()
-                            printed_additions = True
+                            printed_title = True
 
                         stored.append(bout)
                         with shelve.open("Events") as prefs:
@@ -126,12 +122,9 @@ def print_event(title, only_new = False):
                         print()
                         print(title)
                         print()
-                        printed_title = True
-
-                    if not printed_additions:
                         print("Additions:")
                         print()
-                        printed_additions = True
+                        printed_title = True
 
                     stored.append(bout)
                     with shelve.open("Events") as prefs:
@@ -148,9 +141,7 @@ def print_event(title, only_new = False):
         if not printed_title:
             print()
             print(title)
-            print()
             printed_title = True
-
         print()
         print("Cancellations:")
         print()

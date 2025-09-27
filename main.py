@@ -1,7 +1,7 @@
 # Imports
 from cli_utility import print_instruction, print_menu, test_input
 from scrape_utility import get_params, get_html, get_title
-from data_utility import print_event
+from data import print_event
 
 # Retrieves parameters for the page listing upcoming events
 list_of_events = get_params("List of UFC events")

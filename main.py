@@ -1,7 +1,8 @@
 # Imports
-from cli_utility import print_instruction, print_menu, print_bout, test_input
+from cli_utility import print_instruction, print_menu, test_input
 from scrape_utility import get_params, get_html, get_title
-import time
+from data_utility import print_event
+#import shelve
 
 # Retrieves parameters for the page listing upcoming events
 list_of_events = get_params("List of UFC events")
@@ -25,34 +26,32 @@ carry = {}  # {col_index: {"text": str, "rows": int}}
 for row in scheduled_table.find_all("tr")[1:]:  # skip header row
     cols = row.find_all(["td", "th"])
     values = []
-    col_index = 0
-    i = 0
+    fixed_index = 0
+    html_index = 0
 
-    while col_index < 4:
+    while fixed_index < 4:
         # Case where a previous row has an active rowspan
-        if col_index in carry:
-            values.append(carry[col_index]["text"])
-            carry[col_index]["rows"] -= 1
-            if carry[col_index]["rows"] == 0:
-                del carry[col_index]
-            col_index += 1
+        if fixed_index in carry:
+            values.append(carry[fixed_index]["text"])
+            carry[fixed_index]["rows"] -= 1
+            if carry[fixed_index]["rows"] == 0:
+                del carry[fixed_index]
         else:
-            if i < len(cols):
-                cell = cols[i]
+            if html_index < len(cols):
+                cell = cols[html_index]
                 text = cell.get_text(" ", strip=True)
                 values.append(text)
 
                 # Store rowspan if present
                 rowspan = cell.get("rowspan")
                 if rowspan and rowspan.isdigit() and int(rowspan) > 1:
-                    carry[col_index] = {"text": text, "rows": int(rowspan) - 1}
+                    carry[fixed_index] = {"text": text, "rows": int(rowspan) - 1}
 
-                i += 1
-                col_index += 1
+                html_index += 1
             else:
                 # No more columns left, but we still need values
                 values.append("")
-                col_index += 1
+        fixed_index += 1
 
     # Unpack values
     event_name, date, venue, location = values
@@ -77,6 +76,15 @@ for row in scheduled_table.find_all("tr")[1:]:  # skip header row
     max_venue = max(max_venue, len(venue))
     max_location = max(max_location, len(location))
 
+# Creates entry for new fights option
+events.append({
+    "event": "View Newly Announced Fights",
+    "date": "",
+    "venue": "",
+    "location": "",
+    "href": None
+})
+
 # Reverses events to get them in chronological order
 events.reverse()
 
@@ -96,72 +104,16 @@ while test_input(command) != "":
         command = input()
         continue
 
+    if input_num == 0:
+        for event in events:
+            if event["event"] != "View Newly Announced Fights":
+                pass
+        continue
+
     # Retrieves event title from the href
     title = get_title(events[input_num]["href"])
 
-    # Retrieves parameters for the page specific to the event
-    event_title = get_params(title)
-
-    # Retrieves the event page HTML
-    soup = get_html(event_title)
-    tables = soup.find_all("table", {"class": "toccolours"})
-    heading = soup.find("h2", id="Announced_bouts")
-
-    # Tracker for maximum length of first fighter name
-    _max_first = 0
-
-    # These 2 loops retrieve the maximum length of first fighter name
-    # for pretty-printing
-    if tables:
-        scheduled_table = tables[0]
-        for row in scheduled_table.find_all("tr"):
-            cols = row.find_all(["td", "th"])
-            if len(cols) >= 4:
-                _fighter1 = cols[1].get_text(" ", strip=True)
-                _max_first = max(_max_first, len(_fighter1))
-    if heading is not None:
-        ul = heading.find_next("ul")
-        for li in ul.find_all("li"):
-            bout_text = li.get_text(separator=" ", strip=True)
-            _fighter1 = bout_text.split("bout:")[1].split("vs.")[0].strip()
-            _max_first = max(_max_first, len(_fighter1))
-
-    # Extra line
-    print()
-
-    # This loop pretty-prints the current fight card
-    if tables:
-        scheduled_table = tables[0]
-
-        for row in scheduled_table.find_all("tr"):
-            cols = row.find_all(["td", "th"])
-            if cols[0].get_text(" ", strip=True) == "Weight class":
-                continue
-            if len(cols) >= 4:
-                _weight = cols[0].get_text(" ", strip=True)
-                _fighter1 = cols[1].get_text(" ", strip=True)
-                _fighter2 = cols[3].get_text(" ", strip=True)
-                print_bout(_weight, _fighter1, _fighter2, _max_first)
-            else:
-                print()
-                print(cols[0].get_text(" ", strip=True))
-                print()
-
-    # This loop pretty-prints the announced bouts
-    if heading is not None:
-        print()
-        print("Announced bouts")
-        print()
-        ul = heading.find_next("ul")
-        for li in ul.find_all("li"):
-            bout_text = li.get_text(separator=" ", strip=True)
-            _weight = bout_text.split("bout:")[0].strip()
-            _fighter1 = bout_text.split("bout:")[1].split("vs.")[0].strip()
-            _fighter2 = bout_text.split("bout:")[1].split("vs.")[1].split("[")[0].strip()
-            print_bout(_weight, _fighter1, _fighter2, _max_first)
-
-    # Sleeps for 1 second to avoid fast scrape requests
-    time.sleep(1)
+    print_event(title)
 
     # Instructs user to return to menu and waits for input
     print()

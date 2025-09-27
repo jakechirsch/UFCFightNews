@@ -146,6 +146,9 @@ def print_event(title, only_new = False):
         print("Cancellations:")
         print()
         for bout in stored_for_cancellations:
+            stored.remove(bout)
+            with shelve.open("Events") as prefs:
+                prefs[title] = stored
             print(bout, flush=True)
 
     # Sleeps for 1 second to avoid fast scrape requests

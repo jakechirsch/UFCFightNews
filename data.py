@@ -98,8 +98,9 @@ def print_event(title, only_new = False):
         for li in ul.find_all("li"):
             bout_text = li.get_text(separator=" ", strip=True)
             weight = bout_text.split("bout:")[0].strip()
-            fighter1 = bout_text.split("bout:")[1].split("vs.")[0].strip()
-            fighter2 = bout_text.split("bout:")[1].split("vs.")[1].split("[")[0].strip()
+            fighter1 = bout_text.split("bout:")[1].split("vs")[0].strip()
+            fighter2 = bout_text.split("bout:")[1].split("vs")[1].split("[")[0].strip()
+            fighter2 = fighter2.replace(".", "").strip()
 
             # Removes Wikipedia's champ tag
             if fighter1[-4:] == " (c)":

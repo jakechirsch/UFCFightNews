@@ -109,16 +109,18 @@ while test_input(command) != "":
             if event["event"] != "View Newly Announced Fights":
                 # Retrieves event title from the href
                 title = get_title(event["href"])
+                date = event["date"]
 
-                printed_event = print_event(title, only_new = True)
+                printed_event = print_event(title, date, only_new = True)
                 printed_any = printed_any or printed_event
         if not printed_any:
             print("All caught up!")
     else:
         # Retrieves event title from the href
         title = get_title(events[input_num]["href"])
+        date = events[input_num]["date"]
 
-        print_event(title)
+        print_event(title, date)
 
     # Instructs user to return to menu and waits for input
     print()

@@ -7,7 +7,7 @@ import time
 
 # This function iterates through the webpage for a particular
 # UFC event in order to print out the full card
-def print_event(title, only_new = False):
+def print_event(title, date, only_new = False):
     # Retrieves UFC rankings
     rankings = get_rankings()
 
@@ -33,8 +33,8 @@ def print_event(title, only_new = False):
 
     # Gets already-seen fights for this event
     with shelve.open("Events") as prefs:
-        stored = prefs.get(title, [])
-        stored_for_cancellations = prefs.get(title, [])
+        stored = prefs.get(date, [])
+        stored_for_cancellations = prefs.get(date, [])
 
     # This loop pretty-prints the current fight card
     if tables:
@@ -46,6 +46,7 @@ def print_event(title, only_new = False):
                 continue
             if len(cols) >= 4:
                 weight = cols[0].get_text(" ", strip=True)
+                weight = weight.replace(" bout", "")
                 fighter1 = cols[1].get_text(" ", strip=True)
                 fighter2 = cols[3].get_text(" ", strip=True)
 
@@ -76,7 +77,7 @@ def print_event(title, only_new = False):
 
                         stored.append(bout)
                         with shelve.open("Events") as prefs:
-                            prefs[title] = stored
+                            prefs[date] = stored
                         fighter1 = rankings.get(weight + "_" + fighter1, "") + fighter1
                         fighter2 = rankings.get(weight + "_" + fighter2, "") + fighter2
                         bout = return_bout(weight, fighter1, fighter2, max_first)
@@ -129,7 +130,7 @@ def print_event(title, only_new = False):
 
                     stored.append(bout)
                     with shelve.open("Events") as prefs:
-                        prefs[title] = stored
+                        prefs[date] = stored
                     fighter1 = rankings.get(weight + "_" + fighter1, "") + fighter1
                     fighter2 = rankings.get(weight + "_" + fighter2, "") + fighter2
                     bout = return_bout(weight, fighter1, fighter2, max_first)
@@ -149,7 +150,7 @@ def print_event(title, only_new = False):
         for bout in stored_for_cancellations:
             stored.remove(bout)
             with shelve.open("Events") as prefs:
-                prefs[title] = stored
+                prefs[date] = stored
             print(bout, flush=True)
 
     # Sleeps for 1 second to avoid fast scrape requests
@@ -169,6 +170,7 @@ def get_max_fighter1(tables, heading, rankings):
             cols = row.find_all(["td", "th"])
             if len(cols) >= 4:
                 weight = cols[0].get_text(" ", strip=True)
+                weight = weight.replace(" bout", "")
                 fighter1 = cols[1].get_text(" ", strip=True)
 
                 # Removes Wikipedia's champ tag

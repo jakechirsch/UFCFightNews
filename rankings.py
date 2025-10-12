@@ -8,11 +8,10 @@ def get_rankings():
     # Retrieves ranking tables
     tables = get_html(rankings_params).find_all("table", {"class": "wikitable"})
     tables.remove(tables[0])
-    tables.remove(tables[0])
-    tables.remove(tables[0])
 
     # Weight classes in order as they appear on Wikipedia
-    weight_classes = ["Heavyweight",
+    weight_classes = ["Men's pound-for-pound",
+                      "Heavyweight",
                       "Light Heavyweight",
                       "Middleweight",
                       "Welterweight",
@@ -20,6 +19,7 @@ def get_rankings():
                       "Featherweight",
                       "Bantamweight",
                       "Flyweight",
+                      "Women's pound-for-pound",
                       "Women's Bantamweight",
                       "Women's Flyweight",
                       "Women's Strawweight"]
@@ -32,22 +32,23 @@ def get_rankings():
 
     # This loop stores all rankings in the dictionary
     for table in tables:
-        rows = table.find_all("tr")[2:]  # skip header rows
-        for row in rows:
-            cols = row.find_all(["td", "th"])
-            if len(cols) >= 6:
-                rank = cols[0].get_text(" ", strip=True)
-                fighter = cols[2].get_text(" ", strip=True)
+        if weight_classes[weight_class][-15:] != "pound-for-pound":
+            rows = table.find_all("tr")[2:]  # skip header rows
+            for row in rows:
+                cols = row.find_all(["td", "th"])
+                if len(cols) >= 6:
+                    rank = cols[0].get_text(" ", strip=True)
+                    fighter = cols[2].get_text(" ", strip=True)
 
-                # Removes Wikipedia's tied ranking tag
-                if rank[-4:] == " (T)":
-                    rank = rank[:-4]
+                    # Removes Wikipedia's tied ranking tag
+                    if rank[-4:] == " (T)":
+                        rank = rank[:-4]
 
-                if rank == "C":
-                    rank_string = "(C) "
-                else:
-                    rank_string = "#" + rank + " "
-                rankings[weight_classes[weight_class] + "_" + fighter] = rank_string
+                    if rank == "C":
+                        rank_string = "(C) "
+                    else:
+                        rank_string = "#" + rank + " "
+                    rankings[weight_classes[weight_class] + "_" + fighter] = rank_string
         weight_class += 1
 
     return rankings

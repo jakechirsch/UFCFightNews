@@ -83,7 +83,8 @@ def print_event(title, date, only_new = False):
                         bout = return_bout(weight, fighter1, fighter2, max_first)
                         print(bout, flush=True)
                     else:
-                        stored_for_cancellations.remove(bout)
+                        if bout in stored_for_cancellations:
+                            stored_for_cancellations.remove(bout)
             elif not only_new:
                 print()
                 print(cols[0].get_text(" ", strip=True))
@@ -136,7 +137,8 @@ def print_event(title, date, only_new = False):
                     bout = return_bout(weight, fighter1, fighter2, max_first)
                     print(bout, flush=True)
                 else:
-                    stored_for_cancellations.remove(bout)
+                    if bout in stored_for_cancellations:
+                        stored_for_cancellations.remove(bout)
 
     # Prints cancelled bouts
     if only_new and stored_for_cancellations:

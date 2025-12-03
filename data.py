@@ -8,6 +8,9 @@ import time
 # This function iterates through the webpage for a particular
 # UFC event in order to print out the full card
 def print_event(title, date, only_new = False):
+    if not title:
+        return
+
     # Retrieves UFC rankings
     rankings = get_rankings()
 

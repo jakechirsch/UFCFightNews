@@ -26,6 +26,6 @@ def get_html(params):
 
 # This functon gets the event title from the full href
 def get_title(link):
-    if link.startswith("/wiki/"):
+    if link and link.startswith("/wiki/"):
         return unquote(link.split("/wiki/")[-1].split("#")[0])
     return None

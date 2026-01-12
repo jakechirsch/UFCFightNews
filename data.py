@@ -9,7 +9,7 @@ import time
 # UFC event in order to print out the full card
 def print_event(title, date, only_new = False):
     if not title:
-        return
+        return None
 
     # Retrieves UFC rankings
     rankings = get_rankings()
@@ -103,8 +103,8 @@ def print_event(title, date, only_new = False):
         for li in ul.find_all("li"):
             bout_text = li.get_text(separator=" ", strip=True)
             weight = bout_text.split("bout:")[0].strip()
-            fighter1 = bout_text.split("bout:")[1].split("vs")[0].strip()
-            fighter2 = bout_text.split("bout:")[1].split("vs")[1].split("[")[0].strip()
+            fighter1 = bout_text.split("bout:")[1].split(" vs")[0].strip()
+            fighter2 = bout_text.split("bout:")[1].split(" vs")[1].split("[")[0].strip()
             fighter2 = fighter2.replace(".", "").strip()
 
             # Removes Wikipedia's champ tag
@@ -189,7 +189,7 @@ def get_max_fighter1(tables, heading, rankings):
         for li in ul.find_all("li"):
             bout_text = li.get_text(separator=" ", strip=True)
             weight = bout_text.split("bout:")[0].strip()
-            fighter1 = bout_text.split("bout:")[1].split("vs.")[0].strip()
+            fighter1 = bout_text.split("bout:")[1].split(" vs.")[0].strip()
             fighter1 = rankings.get(weight + "_" + fighter1, "") + fighter1
             max_first = max(max_first, len(fighter1))
 
